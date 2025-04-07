@@ -15,7 +15,7 @@ import homeIcon from "@/assets/icons/home.png";
 import transationIcon from "@/assets/icons/transfer.png";
 import investmentIcon from "@/assets/icons/invest.png";
 import addIcon from "@/assets/icons/add.png";
-import profileIcon from "@/assets/icons/user.png";
+import todoIcon from "@/assets/icons/todo.png";
 import { LinearGradient } from "expo-linear-gradient";
 
 function TabIcon({ focused, icon, title }: any) {
@@ -43,7 +43,7 @@ const CustomAddButton = ({ children, onPress }: any) => (
     activeOpacity={0.8}
     className="absolute -top-8 justify-center items-center bg-white rounded-full p-1.5 border-x border-blue-50"
   >
-    <View className="w-16 h-16 bg-pink-600 rounded-full justify-center items-center shadow-xl overflow-hidden">
+    <View className="w-16 h-16 rounded-full justify-center items-center shadow-xl overflow-hidden">
       <LinearGradient
         colors={["#2B7FFF", "#BEDBFF"]}
         start={[0, 1]}
@@ -72,7 +72,7 @@ const _layout = () => {
           backgroundColor: "white",
           borderRadius: 10,
           paddingTop: 5,
-          height: 80,
+          height: 70,
           borderWidth: 1,
           borderColor: "#DBEAFE",
         },
@@ -138,12 +138,12 @@ const _layout = () => {
       />
 
       <Tabs.Screen
-        name="profile"
+        name="todo"
         options={{
-          title: "Profile",
+          title: "Todo",
           headerShown: false,
           tabBarIcon: ({ focused }: any) => (
-            <TabIcon focused={focused} icon={profileIcon} title="Profile" />
+            <TabIcon focused={focused} icon={todoIcon} title="Todo" />
           ),
           tabBarButton: (props: any) => (
             <TouchableOpacity {...(props as TouchableOpacityProps)} />
