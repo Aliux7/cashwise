@@ -3,11 +3,11 @@ import "../global.css";
 import { StatusBar } from "react-native";
 import { useEffect } from "react";
 import * as SystemUI from "expo-system-ui";
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function RootLayout() {
   return (
-    <GestureHandlerRootView>
+    <GestureHandlerRootView> 
       <StatusBar backgroundColor="#FFFFFF" barStyle="dark-content" />
       <Stack>
         <Stack.Screen

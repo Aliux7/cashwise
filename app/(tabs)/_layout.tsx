@@ -12,7 +12,7 @@ import {
 import React from "react";
 import { Tabs } from "expo-router";
 import homeIcon from "@/assets/icons/home.png";
-import transationIcon from "@/assets/icons/transfer.png";
+import transactionIcon from "@/assets/icons/transfer.png";
 import investmentIcon from "@/assets/icons/invest.png";
 import addIcon from "@/assets/icons/add.png";
 import todoIcon from "@/assets/icons/todo.png";
@@ -100,7 +100,7 @@ const _layout = () => {
           tabBarIcon: ({ focused }: any) => (
             <TabIcon
               focused={focused}
-              icon={transationIcon}
+              icon={transactionIcon}
               title="Transactions"
             />
           ),

@@ -5,26 +5,37 @@ import {
   SharedValue,
   clamp,
   runOnJS,
+  useDerivedValue,
   useSharedValue,
   withDelay,
   withTiming,
 } from "react-native-reanimated";
-import { DataType } from "../data/data";
 import {
   Gesture,
   GestureDetector,
   PanGestureHandlerEventPayload,
 } from "react-native-gesture-handler";
-import XAxisText from "./XAxisText";
-import Cursor from "./Cursor";
 import { getYForX, parse } from "react-native-redash";
+import Cursor from "./Cursor";
 import Gradient from "./Gradient";
+
+export type DataType = {
+  label: string;
+  date: string;
+  value: number;
+};
+
+export type MultiDataSet = {
+  label: string;
+  color: string;
+  data: DataType[];
+};
 
 type Props = {
   chartWidth: number;
   chartHeight: number;
   chartMargin: number;
-  data: DataType[];
+  datasets: MultiDataSet[];
   setSelectedDate: React.Dispatch<React.SetStateAction<string>>;
   selectedValue: SharedValue<number>;
   selectedLabel: SharedValue<string>;
@@ -34,7 +45,7 @@ const LineChart = ({
   chartHeight,
   chartMargin,
   chartWidth,
-  data,
+  datasets,
   setSelectedDate,
   selectedValue,
   selectedLabel,
@@ -44,10 +55,11 @@ const LineChart = ({
   const animationGradient = useSharedValue({ x: 0, y: 0 });
   const cx = useSharedValue(20);
   const cy = useSharedValue(0);
-  const totalValue = data.reduce((acc, cur) => acc + cur.value, 0);
+
+  const primaryData = datasets[0].data;
+  const totalValue = primaryData.reduce((acc, cur) => acc + cur.value, 0);
 
   useEffect(() => {
-    // Animate the line and the gradient
     animationLine.value = withTiming(1, { duration: 1000 });
     animationGradient.value = withDelay(
       1000,
@@ -55,64 +67,62 @@ const LineChart = ({
     );
     selectedValue.value = withTiming(totalValue);
     selectedLabel.value = "Total Last 6 Months";
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // x domain
-  const xDomain = data.map((dataPoint: DataType) => dataPoint.label);
+  const allLabels = primaryData.map((d) => d.label);
+  const allValues = datasets.flatMap((ds) => ds.data.map((d) => d.value));
 
-  // range of the x scale
-  const xRange = [chartMargin, chartWidth - chartMargin];
+  const x = scalePoint()
+    .domain(allLabels)
+    .range([chartMargin, chartWidth - chartMargin])
+    .padding(0);
 
-  // Create the x scale
-  const x = scalePoint().domain(xDomain).range(xRange).padding(0);
+  const y = scaleLinear()
+    .domain([Math.min(...allValues) * 0.9, Math.max(...allValues) * 1.1])
+    .range([chartHeight, 0]);
 
   const stepX = x.step();
 
-  // Find the max and min values of the data
-  const max = Math.max(...data.map((val) => val.value));
-  const min = Math.min(...data.map((val) => val.value));
-  // y domain
-  const yDomain = [min, max];
+  const curvedLines = datasets.map(({ data }) =>
+    line<DataType>()
+      .x((d) => x(d.label)!)
+      .y((d) => y(d.value))
+      .curve(curveBasis)(data)
+  );
 
-  // range of the y scale
-  const yRange = [chartHeight, 0];
+  const filteredCurvedLines = curvedLines.filter(
+    (line): line is string => line !== null
+  );
 
-  // Create the y scale
-  const y = scaleLinear().domain(yDomain).range(yRange);
+  const linePaths = curvedLines.map((d) => Skia.Path.MakeFromSVGString(d!));
 
-  // Create the curved line
-  const curvedLine = line<DataType>()
-    .x((d) => x(d.label)!)
-    .y((d) => y(d.value))
-    .curve(curveBasis)(data);
+  const parsedPaths = linePaths.map((p) => parse(p!.toSVGString()));
 
-  const linePath = Skia.Path.MakeFromSVGString(curvedLine!);
+  // 🟢 Always define derived Y values (one per line)
+  const cyList = parsedPaths.map((path) =>
+    useDerivedValue(() => getYForX(path, Math.floor(cx.value)) ?? 0)
+  );
 
-  // Parse the path to get the points
-  const path = parse(linePath!.toSVGString());
-
-  // handle the gesture event
   const handleGestureEvent = (e: PanGestureHandlerEventPayload) => {
     "worklet";
-
     const index = Math.floor(e.absoluteX / stepX);
-    runOnJS(setSelectedDate)(data[index].date);
-    selectedValue.value = withTiming(data[index].value);
-    selectedLabel.value = data[index].label; 
+    const clampedIndex = Math.max(0, Math.min(index, primaryData.length - 1));
+    const point = primaryData[clampedIndex];
+
+    runOnJS(setSelectedDate)(point.date);
+    selectedLabel.value = point.label;
+
     const clampValue = clamp(
-      Math.floor(e.absoluteX / stepX) * stepX + chartMargin,
+      clampedIndex * stepX + chartMargin,
       chartMargin,
       chartWidth - chartMargin
     );
 
+    // Use first dataset for label/value
+    selectedValue.value = withTiming(primaryData[clampedIndex].value);
     cx.value = clampValue;
-    // for some device getYForX returns null for the last point
-    // so we need to floor the value
-    cy.value = getYForX(path, Math.floor(clampValue))!;
   };
 
-  // Pan gesture handler
   const pan = Gesture.Pan()
     .onTouchesDown(() => {
       runOnJS(setShowCursor)(true);
@@ -134,31 +144,38 @@ const LineChart = ({
           height: chartHeight,
         }}
       >
-        <Path
-          style="stroke"
-          path={linePath!}
-          strokeWidth={2}
-          color="#3b82f6"
-          end={animationLine}
-          start={0}
-          strokeCap={"round"}
-        />
         <Gradient
           chartHeight={chartHeight}
           chartWidth={chartWidth}
           chartMargin={chartMargin}
           animationGradient={animationGradient}
-          curvedLine={curvedLine!}
+          curvedLines={filteredCurvedLines}
         />
-        {/* {data.map((dataPoint: DataType, index) => (
-          <XAxisText
-            x={x(dataPoint.label)!}
-            y={chartHeight}
-            text={dataPoint.label}
-            key={index}
+
+        {linePaths.map((path, idx) => (
+          <Path
+            key={`line-${idx}`}
+            style="stroke"
+            path={path!}
+            strokeWidth={2}
+            color={datasets[idx].color}
+            end={animationLine}
+            start={0}
+            strokeCap={"round"}
           />
-        ))} */}
-        {showCursor && <Cursor cx={cx} cy={cy} chartHeight={chartHeight} />}
+        ))}
+
+        {/* 🟢 Show 1 cursor per dataset */}
+        {showCursor &&
+          cyList.map((cy, i) => (
+            <Cursor
+              key={`cursor-${i}`}
+              cx={cx}
+              cy={cy}
+              chartHeight={chartHeight}
+              color={datasets[i].color}
+            />
+          ))}
       </Canvas>
     </GestureDetector>
   );

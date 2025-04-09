@@ -14,7 +14,7 @@ const AnimatedText = ({ selectedValue, selectedLabel, font }: Props) => {
   const MARGIN_VERTICAL = 10;
 
   const animatedValueText = useDerivedValue(() => {
-    return `$${Math.round(selectedValue.value).toLocaleString()}`;
+    return `Rp. ${Math.round(selectedValue.value).toLocaleString()}`;
   });
 
   const animatedLabelText = useDerivedValue(() => {

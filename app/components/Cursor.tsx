@@ -6,12 +6,14 @@ type Props = {
   cx: SharedValue<number>;
   cy: SharedValue<number>;
   chartHeight: number;
+  color: string;  
 };
 
-const Cursor = ({ cx, cy, chartHeight }: Props) => {
+const Cursor = ({ cx, cy, chartHeight, color }: Props) => {
   const path = useDerivedValue(() => {
-    const dottedLine = Skia.Path.Make().lineTo(0, chartHeight - cy.value - 20);
-    dottedLine.dash(10, 10, 0);
+    const dottedLine = Skia.Path.Make().moveTo(0, 0).lineTo(0, chartHeight - cy.value);
+
+    dottedLine.dash(5, 5, 0);
 
     const matrix = Skia.Matrix();
     matrix.translate(cx.value, cy.value);
@@ -24,7 +26,7 @@ const Cursor = ({ cx, cy, chartHeight }: Props) => {
     <Group>
       <Path
         path={path}
-        color="#60a5fa"
+        color={color}
         style="stroke"
         strokeJoin="round"
         strokeWidth={2}
@@ -34,7 +36,7 @@ const Cursor = ({ cx, cy, chartHeight }: Props) => {
         cx={cx}
         cy={cy}
         strokeWidth={5}
-        color={"#60a5fa"}
+        color={color}
         style={"stroke"}
       />
       <Circle r={5} cx={cx} cy={cy} color={"#bfdbfe"} style={"fill"} />
