@@ -19,7 +19,7 @@ export const data: DataType[] = [
 export const lineChartData = [
   {
     label: "Revenue",
-    color: "#3b82f6", 
+    color: "#3b82f6",
     data: [
       { label: "Sat", date: "Saturday", value: 1500000 },
       { label: "Sun", date: "Sunday", value: 5000000 },
@@ -32,7 +32,7 @@ export const lineChartData = [
   },
   {
     label: "Expenses",
-    color: "#22c55e",  
+    color: "#22c55e",
     data: [
       { label: "Sat", date: "Saturday", value: 2000000 },
       { label: "Sun", date: "Sunday", value: 2800000 },
@@ -45,7 +45,7 @@ export const lineChartData = [
   },
   {
     label: "Expenses",
-    color: "#ef4444",  
+    color: "#ef4444",
     data: [
       { label: "Sat", date: "Saturday", value: 1000000 },
       { label: "Sun", date: "Sunday", value: 1800000 },
@@ -57,3 +57,8 @@ export const lineChartData = [
     ],
   },
 ];
+
+export default {
+  data,
+  lineChartData,
+};

@@ -7,9 +7,13 @@ import {
   StatusBar,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
-import { useSharedValue, withTiming } from "react-native-reanimated";
-import { generateRandomNumbers } from "../utils/generateRandomNumbers";
-import { calculatePercentage } from "../utils/calculatePercentage";
+import Animated, {
+  FadeInDown,
+  FadeOutDown,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+import calculatePercentage from "../utils/calculatePercentage";
 import { useFont } from "@shopify/react-native-skia";
 import DonutChart from "../components/DonutChart";
 import RenderItem from "../components/RenderItem";
@@ -19,6 +23,7 @@ import analyticsIcon from "@/assets/icons/analytics.png";
 import dropdownIcon from "@/assets/icons/dropdown.png";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect } from "expo-router";
+import generateRandomNumbers from "../utils/generateRandomNumbers";
 
 interface Data {
   value: number;
@@ -31,7 +36,7 @@ const STROKE_WIDTH = 15;
 const OUTER_STROKE_WIDTH = 36;
 const GAP = 0.035;
 
-const transactions = () => {
+const cashflow = () => {
   const [isAnalytics, setIsAnalytics] = useState(false);
   const [n, setN] = useState(2);
   const [colors, setColors] = useState(["#4ade80", "#f87171"]);
@@ -91,7 +96,7 @@ const transactions = () => {
     },
   ];
   const decimals = useSharedValue<number[]>([]);
- 
+
   const generateData = useCallback(() => {
     const generateNumbers = generateRandomNumbers(n);
     const total = generateNumbers.reduce((acc, curr) => acc + curr, 0);
@@ -152,10 +157,13 @@ const transactions = () => {
       <View className="flex-1 bg-white">
         <ScrollView>
           <View className="w-full items-center relative">
-            <TouchableOpacity onPress={toggleAnalytics} className="absolute top-6 right-6">
+            <TouchableOpacity
+              onPress={toggleAnalytics}
+              className="absolute top-6 right-6"
+            >
               <Image
                 source={!isAnalytics ? analyticsIcon : transactionIcon}
-                style={{ tintColor: "#51A2FF", width: 18, height: 18, }}
+                style={{ tintColor: "#51A2FF", width: 18, height: 18 }}
               />
             </TouchableOpacity>
             <View
@@ -176,58 +184,66 @@ const transactions = () => {
               />
             </View>
           </View>
-          <View className="flex flex-row m-5 gap-4">
-            <View className="flex-1 h-20 rounded-md overflow-hidden border border-green-200">
-              <LinearGradient
-                colors={["#DBFCE7", "#F0FDF4", "#F0FDF4"]}
-                start={[0, 0]}
-                end={[1, 1]}
-                className="flex justify-center items-start w-full h-full px-4"
-              >
-                <View className="flex flex-row justify-between w-full items-center">
-                  <Text className="text-xs text-gray-500 ">Your Income</Text>
-                  <Image
-                    source={arrowIcon}
-                    style={{ tintColor: "#16a34a", width: 12, height: 12 }}
-                  />
-                </View>
-                <Text className="text-lg text-green-600 mt-0.5 truncate w-full">
-                  Rp. 10.000.000,00
-                </Text>
-              </LinearGradient>
-            </View>
-            <View className="flex-1 h-20 rounded-md overflow-hidden border border-red-200">
-              <LinearGradient
-                colors={["#FFE2E2", "#FEF2F2", "#FEF2F2"]}
-                start={[0, 0]}
-                end={[1, 1]}
-                className="flex justify-center items-start w-full h-full px-4"
-              >
-                <View className="flex flex-row justify-between w-full items-center">
-                  <Text className="text-xs text-gray-500">Your Expenses</Text>
-                  <Image
-                    source={arrowIcon}
-                    className="rotate-180"
-                    style={{
-                      tintColor: "#dc2626",
-                      width: 12,
-                      height: 12,
-                      transform: [{ rotate: "180deg" }],
-                    }}
-                  />
-                </View>
-                <Text
-                  numberOfLines={1}
-                  className="text-lg text-red-600 mt-0.5 truncate w-full"
+          {!isAnalytics && (
+            <View className="flex flex-row m-5 gap-4">
+              <View className="flex-1 h-20 rounded-md overflow-hidden border border-green-200">
+                <LinearGradient
+                  colors={["#DBFCE7", "#F0FDF4", "#F0FDF4"]}
+                  start={[0, 0]}
+                  end={[1, 1]}
+                  className="flex justify-center items-start w-full h-full px-4"
                 >
-                  Rp. 10.000.000,00
-                </Text>
-              </LinearGradient>
+                  <View className="flex flex-row justify-between w-full items-center">
+                    <Text className="text-xs text-gray-500 ">Your Income</Text>
+                    <Image
+                      source={arrowIcon}
+                      style={{ tintColor: "#16a34a", width: 12, height: 12 }}
+                    />
+                  </View>
+                  <Text className="text-lg text-green-600 mt-0.5 truncate w-full">
+                    Rp. 10.000.000,00
+                  </Text>
+                </LinearGradient>
+              </View>
+              <View className="flex-1 h-20 rounded-md overflow-hidden border border-red-200">
+                <LinearGradient
+                  colors={["#FFE2E2", "#FEF2F2", "#FEF2F2"]}
+                  start={[0, 0]}
+                  end={[1, 1]}
+                  className="flex justify-center items-start w-full h-full px-4"
+                >
+                  <View className="flex flex-row justify-between w-full items-center">
+                    <Text className="text-xs text-gray-500">Your Expenses</Text>
+                    <Image
+                      source={arrowIcon}
+                      className="rotate-180"
+                      style={{
+                        tintColor: "#dc2626",
+                        width: 12,
+                        height: 12,
+                        transform: [{ rotate: "180deg" }],
+                      }}
+                    />
+                  </View>
+                  <Text
+                    numberOfLines={1}
+                    className="text-lg text-red-600 mt-0.5 truncate w-full"
+                  >
+                    Rp. 10.000.000,00
+                  </Text>
+                </LinearGradient>
+              </View>
             </View>
-          </View>
+          )}
           <View className="m-5 flex flex-col gap-4">
-            <View className="flex flex-row justify-between items-center">
-              <Text className="text-gray-500 text-xl">Transactions</Text>
+            <Animated.View
+              className="flex flex-row justify-between items-center"
+              entering={FadeInDown}
+              exiting={FadeOutDown}
+            >
+              <Text className="text-gray-500 text-xl">
+                {isAnalytics ? "Categories" : "Transactions"}
+              </Text>
               <View className="flex flex-row justify-center items-center gap-2">
                 <Text className="text-gray-800 text-xl">April 2025</Text>
                 <Image
@@ -235,31 +251,41 @@ const transactions = () => {
                   style={{ tintColor: "#6b7280", width: 10, height: 10 }}
                 />
               </View>
-            </View>
-            <View>
-              {transactions.map((item) => (
-                <View
-                  key={item.id}
-                  className="flex-row justify-between items-center py-3 border-b border-blue-50"
-                >
-                  <View>
-                    <Text className="text-lg text-black">{item.title}</Text>
-                    <Text className="text-sm text-gray-400">
-                      {item.date} - {item.category}
-                    </Text>
-                  </View>
-                  <Text
-                    className={`text-base font-semibold ${
-                      item.amount > 0 ? "text-green-500" : "text-red-500"
-                    }`}
+            </Animated.View>
+            {!isAnalytics ? (
+              <View>
+                {transactions.map((item, index) => (
+                  <Animated.View
+                    key={index}
+                    className="flex-row justify-between items-center py-3 border-b border-blue-50"
+                    entering={FadeInDown.delay(index * 200)}
+                    exiting={FadeOutDown}
                   >
-                    {item.amount > 0
-                      ? `+Rp. ${item.amount}`
-                      : `-Rp. ${Math.abs(item.amount)}`}
-                  </Text>
-                </View>
-              ))}
-            </View>
+                    <View>
+                      <Text className="text-lg text-black">{item.title}</Text>
+                      <Text className="text-sm text-gray-400">
+                        {item.date} - {item.category}
+                      </Text>
+                    </View>
+                    <Text
+                      className={`text-base font-semibold ${
+                        item.amount > 0 ? "text-green-500" : "text-red-500"
+                      }`}
+                    >
+                      {item.amount > 0
+                        ? `+Rp. ${item.amount}`
+                        : `-Rp. ${Math.abs(item.amount)}`}
+                    </Text>
+                  </Animated.View>
+                ))}
+              </View>
+            ) : (
+              <View>
+                {data.map((item, index) => (
+                  <RenderItem item={item} key={index} index={index} />
+                ))}
+              </View>
+            )}
           </View>
           {/* <ScrollView
           horizontal
@@ -271,9 +297,7 @@ const transactions = () => {
           }}
         >
           <View className="flex-row items-center justify-center space-x-2 px-4 gap-5">
-            {data.map((item, index) => (
-              <RenderItem item={item} key={index} index={index} />
-            ))}
+            
           </View>
         </ScrollView>  */}
         </ScrollView>
@@ -282,4 +306,4 @@ const transactions = () => {
   );
 };
 
-export default transactions;
+export default cashflow;

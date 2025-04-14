@@ -1,4 +1,4 @@
-export function generateRandomNumbers(n: number): number[] {
+const generateRandomNumbers = (n: number): number[] => {
   const min = 100;
   const max = 500;
   const result: number[] = [];
@@ -9,4 +9,6 @@ export function generateRandomNumbers(n: number): number[] {
   }
 
   return result;
-}
+};
+
+export default generateRandomNumbers;
