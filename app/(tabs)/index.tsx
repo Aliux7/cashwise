@@ -1,27 +1,28 @@
 import { Link, useFocusEffect } from "expo-router";
 import {
   Image,
-  SafeAreaView,
   ScrollView,
-  StatusBar,
   Text,
   useWindowDimensions,
   View,
 } from "react-native";
 import profileIcon from "@/assets/icons/user.png";
-import viewIcon from "@/assets/icons/view.png";
 import arrowIcon from "@/assets/icons/arrow.png";
 import { LinearGradient } from "expo-linear-gradient";
-import { addDays, subDays } from "date-fns";
-import LineChart from "../components/LineChart";
-import { data, lineChartData } from "../data/data";
-import { useCallback, useState } from "react";
+import { lineChartData } from "../data/data";
+import { useCallback, useEffect, useState } from "react";
 import { useSharedValue } from "react-native-reanimated";
-import AnimatedText from "../components/AnimatedText";
+import AnimatedText from "../components/LineChartComponents/AnimatedText";
 import { useFont } from "@shopify/react-native-skia";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useTransactionStore } from "@/store/useTransactionStore";
 import { Timestamp } from "firebase/firestore";
+import { usePortfolioStore } from "@/store/usePortofolioStore";
+import investmentIcon from "@/assets/icons/invest.png";
+import { getCashflowLineChartData } from "@/services/assets";
+import LineChart, {
+  MultiDataSet,
+} from "../components/LineChartComponents/LineChart";
 
 export default function Index() {
   const CHART_MARGIN = 0;
@@ -29,19 +30,49 @@ export default function Index() {
   const { width: CHART_WIDTH } = useWindowDimensions();
   const user = useAuthStore((state) => state.user);
   const [selectedDate, setSelectedDate] = useState<string>("Total");
-  const selectedValue = useSharedValue(0);
+  const { totalValue, fetchAssets } = usePortfolioStore();
+  const selectedIncome = useSharedValue(0);
+  const selectedExpenses = useSharedValue(0);
   const selectedLabel = useSharedValue("");
   const font = useFont(require("../../assets/fonts/SpaceMono-Regular.ttf"), 15);
   const { totalIncome, totalExpense, transactions, fetchTransactions } =
     useTransactionStore();
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [lineChartData, setLineChartData] = useState<MultiDataSet[]>([]);
+
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
 
   useFocusEffect(
     useCallback(() => {
-      fetchTransactions(selectedYear, selectedMonth);
-    }, [selectedMonth, selectedYear])
+      if (user?.email) {
+        fetchTransactions(user?.email || "", selectedYear, selectedMonth);
+        getCashflowLineChartData(user?.email).then((result) => {
+          console.log(JSON.stringify(result, null, 2));
+          setLineChartData(result);
+        });
+      }
+    }, [selectedMonth, selectedYear, user?.email])
   );
+
+  useEffect(() => {
+    if (user?.email) {
+      fetchAssets(user.email);
+    }
+  }, [user?.email]);
 
   const formatDate = (timestamp: Timestamp) => {
     const date = timestamp.toDate();
@@ -65,6 +96,13 @@ export default function Index() {
   const formatToRupiah = (value: string) => {
     const numberOnly = value.replace(/\D/g, "");
     return numberOnly.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
+
+  const formatNumberWithDots = (amount: number) => {
+    return amount.toLocaleString("id-ID", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    });
   };
 
   if (!font) {
@@ -103,7 +141,8 @@ export default function Index() {
           <View className="flex flex-col w-full">
             <View className="flex flex-col justify-between items-start mx-5 border-l border-b border-blue-200 rounded-md">
               <AnimatedText
-                selectedValue={selectedValue}
+                selectedIncome={selectedIncome}
+                selectedExpenses={selectedExpenses}
                 selectedLabel={selectedLabel}
                 font={font}
               />
@@ -113,7 +152,8 @@ export default function Index() {
                 chartWidth={CHART_WIDTH - 37}
                 chartMargin={CHART_MARGIN}
                 setSelectedDate={setSelectedDate}
-                selectedValue={selectedValue}
+                selectedIncome={selectedIncome}
+                selectedExpenses={selectedExpenses}
                 selectedLabel={selectedLabel}
               />
             </View>
@@ -129,13 +169,13 @@ export default function Index() {
                     Your Total Investment Assets
                   </Text>
                   <Text className="text-2xl text-blue-600 mt-0.5">
-                    Rp. 10.000.000,00
+                    $ {formatNumberWithDots(totalValue)}
                   </Text>
                 </View>
                 <Image
-                  source={viewIcon}
+                  source={investmentIcon}
                   style={{ tintColor: "#51A2FF" }}
-                  className="size-5 self-start mt-3"
+                  className="size-8 self-center"
                 />
               </LinearGradient>
             </View>
@@ -149,7 +189,7 @@ export default function Index() {
                 >
                   <View className="flex flex-row justify-between w-full items-center">
                     <Text className="text-xs text-gray-500 ">
-                      Your Income (April)
+                      Your Income ({monthNames[selectedMonth]})
                     </Text>
                     <Image
                       source={arrowIcon}
@@ -170,7 +210,7 @@ export default function Index() {
                 >
                   <View className="flex flex-row justify-between w-full items-center">
                     <Text className="text-xs text-gray-500">
-                      Your Expenses (April)
+                      Your Expenses ({monthNames[selectedMonth]})
                     </Text>
                     <Image
                       source={arrowIcon}

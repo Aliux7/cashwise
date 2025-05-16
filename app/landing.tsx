@@ -1,5 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { Link, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -7,6 +7,7 @@ import {
   TextInput,
   TouchableOpacity,
   ImageBackground,
+  ActivityIndicator,
 } from "react-native";
 import Modal from "react-native-modal";
 import { db, auth } from "@/config/firebase";
@@ -27,6 +28,7 @@ const landing = () => {
   const [passwordRegister, setPasswordRegister] = useState("");
   const [isLoginModalVisible, setLoginModalVisible] = useState(false);
   const [isRegisterModalVisible, setRegisterModalVisible] = useState(false);
+  const [isLoadingModalVisible, setLoadingModalVisible] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -39,7 +41,8 @@ const landing = () => {
       alert("Please fill in both email and password");
       return;
     }
-
+    setLoginModalVisible(false);
+    setLoadingModalVisible(true);
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
@@ -59,7 +62,7 @@ const landing = () => {
           name: userData.name,
         });
       } else {
-        alert("User data not found in Firestore");
+        alert("User data not found");
         return;
       }
 
@@ -67,8 +70,14 @@ const landing = () => {
       setLoginModalVisible(false);
       router.replace("/");
     } catch (error: any) {
-      console.error("Login error:", error.message);
-      alert(error.message);
+      if (error.message == "Firebase: Error (auth/invalid-credential).") {
+        alert("Invalid credentials, please try again . . .");
+        setLoadingModalVisible(false);
+        return;
+      } else {
+        alert("Something wrong, please try again later . . . ");
+      }
+      setLoadingModalVisible(false);
     }
   };
 
@@ -78,6 +87,7 @@ const landing = () => {
       return;
     }
 
+    setLoadingModalVisible(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -97,8 +107,9 @@ const landing = () => {
       alert("Registration successful!");
     } catch (error: any) {
       console.error("Registration error:", error.message);
-      alert(error.message);
+      alert("Something wrong, please try again later . . . ");
     }
+    setLoadingModalVisible(false);
   };
 
   return (
@@ -112,9 +123,6 @@ const landing = () => {
           <Text className="text-gray-800 text-3xl font-bold">
             Your Next Wise Move
           </Text>
-          {/* <Text className="text-gray-800 text-3xl font-bold">
-            Is One Tap Away
-          </Text> */}
         </View>
         <View className="flex justify-end items-center px-8">
           <Text className="text-gray-400 text-base text-center">
@@ -268,9 +276,14 @@ const landing = () => {
           </TouchableOpacity>
         </View>
       </Modal>
+      <Modal
+        isVisible={isLoadingModalVisible}
+        onBackdropPress={() => setRegisterModalVisible(false)}
+      >
+        <ActivityIndicator size="large" />
+      </Modal>
     </ImageBackground>
   );
 };
 
 export default landing;
- 

@@ -1,10 +1,4 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Image, 
-} from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Animated, {
   FadeInDown,
@@ -12,25 +6,23 @@ import Animated, {
   useDerivedValue,
   useSharedValue,
   withTiming,
-} from "react-native-reanimated"; 
+} from "react-native-reanimated";
 import { useFont } from "@shopify/react-native-skia";
-import DonutChart from "../components/DonutChart";
+import DonutChart from "../components/DonutChartComponents/DonutChart";
 import RenderItem from "../components/RenderItem";
 import transactionIcon from "@/assets/icons/profit.png";
 import arrowIcon from "@/assets/icons/arrow.png";
 import analyticsIcon from "@/assets/icons/analytics.png";
 import dropdownIcon from "@/assets/icons/dropdown.png";
 import { LinearGradient } from "expo-linear-gradient";
-import { useFocusEffect } from "expo-router"; 
-import {
-  deleteTransaction,
-  getTransactionsByEmailAndDate,
-} from "@/services/cashflow";
+import { useFocusEffect } from "expo-router";
+import { deleteTransaction } from "@/services/cashflow";
 import { Timestamp } from "firebase/firestore";
 import { useTransactionStore } from "@/store/useTransactionStore";
 import { Picker } from "@react-native-picker/picker";
-import LongPress from "../components/LongPress";
+import LongPressTransaction from "../components/LongPressTransaction";
 import Modal from "react-native-modal";
+import { useAuthStore } from "@/store/useAuthStore";
 
 interface Data {
   name: string;
@@ -45,6 +37,7 @@ const OUTER_STROKE_WIDTH = 36;
 const GAP = 0.035;
 
 const cashflow = () => {
+  const user = useAuthStore((state) => state.user);
   const [isModalDeleteVisible, setIsModalDeleteVisible] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<any | null>(
     null
@@ -54,6 +47,7 @@ const cashflow = () => {
     setSelectedTransaction(transaction);
     setIsModalDeleteVisible(true);
   };
+
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [isModalFilterVisible, setIsModalFilterVisible] = useState(false);
@@ -101,7 +95,7 @@ const cashflow = () => {
 
   useFocusEffect(
     useCallback(() => {
-      fetchTransactions(selectedYear, selectedMonth);
+      fetchTransactions(user?.email || "", selectedYear, selectedMonth);
     }, [selectedMonth, selectedYear])
   );
   useEffect(() => {
@@ -183,13 +177,16 @@ const cashflow = () => {
       const safeTotal = total === 0 ? 1 : total;
 
       const newData: Data[] = entries
-        .map(([name, value], index) => ({
+        .map(([name, value]) => ({
           name,
           value,
           percentage: Math.round((value / safeTotal) * 100),
-          color: colors[index % colors.length],
         }))
-        .sort((a, b) => b.percentage - a.percentage);
+        .sort((a, b) => b.percentage - a.percentage)
+        .map((item, index) => ({
+          ...item,
+          color: colors[index % colors.length],
+        }));
 
       setData(newData);
       decimals.value = newData.map((item) => item.value / safeTotal);
@@ -199,7 +196,7 @@ const cashflow = () => {
 
   const handleDeleteTransaction = async (idTransaction: string) => {
     const result = await deleteTransaction(idTransaction);
-    fetchTransactions(selectedYear, selectedMonth);
+    fetchTransactions(user?.email || "", selectedYear, selectedMonth);
     setIsModalDeleteVisible(false);
   };
 
@@ -323,7 +320,7 @@ const cashflow = () => {
             {!isAnalytics ? (
               <View>
                 {transactions?.map((item, index) => (
-                  <LongPress
+                  <LongPressTransaction
                     key={index}
                     item={item}
                     index={index}

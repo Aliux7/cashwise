@@ -4,13 +4,13 @@ import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
 import { LongPressGestureHandler } from "react-native-gesture-handler";
 import { Timestamp } from "firebase/firestore";
 
-interface LongPressProps {
+interface LongPressTransactionProps {
   item: any;
   index: number;
   onLongPress: (transaction: any) => void;
 }
 
-const LongPress: React.FC<LongPressProps> = ({ item, index, onLongPress }) => {
+const LongPressTransaction: React.FC<LongPressTransactionProps> = ({ item, index, onLongPress }) => {
   const formatDate = (timestamp: Timestamp) => {
     const date = timestamp.toDate();
     const today = new Date();
@@ -46,7 +46,7 @@ const LongPress: React.FC<LongPressProps> = ({ item, index, onLongPress }) => {
       <Animated.View
         key={index}
         className="flex-row justify-between items-center py-3 border-b border-blue-50"
-        entering={FadeInDown.delay(index * 200)}
+        entering={FadeInDown.delay(index * 20)}
         exiting={FadeOutDown}
       >
         <View>
@@ -68,4 +68,4 @@ const LongPress: React.FC<LongPressProps> = ({ item, index, onLongPress }) => {
   );
 };
 
-export default LongPress;
+export default LongPressTransaction;

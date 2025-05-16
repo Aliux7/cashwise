@@ -6,7 +6,7 @@ interface TransactionStore {
   totalIncome: number;
   totalExpense: number;
   categories: Record<string, number>;
-  fetchTransactions: (year: number, month: number) => Promise<void>;
+  fetchTransactions: (email: string, year: number, month: number) => Promise<void>;
 }
 
 export const useTransactionStore = create<TransactionStore>((set) => ({
@@ -14,9 +14,8 @@ export const useTransactionStore = create<TransactionStore>((set) => ({
   totalIncome: 0,
   totalExpense: 0,
   categories: {},
-  fetchTransactions: async (year: number, month: number) => {
-    try {
-      const email = "kelsonsusilo@gmail.com";
+  fetchTransactions: async (email: string, year: number, month: number) => {
+    try { 
       const fetched = await getTransactionsByEmailAndDate(email, year, month);
 
       set({

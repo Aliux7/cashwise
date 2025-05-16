@@ -3,7 +3,7 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity, 
+  TouchableOpacity,
   Keyboard,
 } from "react-native";
 import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
@@ -40,7 +40,13 @@ const categoryData = [
   { label: "Subscriptions", value: "Subscriptions" },
 ];
 
-export default function NumPad({ onClose, email }: { onClose: () => void, email: string }) {
+export default function NumPad({
+  onClose,
+  email,
+}: {
+  onClose: () => void;
+  email: string;
+}) {
   const { fetchTransactions } = useTransactionStore();
   const amountInputRef = useRef<TextInput>(null);
   const titleInputRef = useRef<TextInput>(null);
@@ -55,7 +61,7 @@ export default function NumPad({ onClose, email }: { onClose: () => void, email:
   const [titleError, setTitleError] = useState(false);
   const [categoryError, setCategoryError] = useState(false);
 
-  const handleKeyPress = (key: string) => {
+  const handleKeyPress = (key: string) => { 
     Haptics.selectionAsync();
     setAmount((prev) => {
       if (prev.length >= 12) return prev;
@@ -107,21 +113,21 @@ export default function NumPad({ onClose, email }: { onClose: () => void, email:
   };
 
   const handleSubmitTransaction = async () => {
-    if (!title.trim()) {
+    if (!title.trim()) { 
       setTitleError(true);
       return;
     }
     setTitleError(false);
-
-    if (!valueCategory) {
+    
+    if (!valueCategory) { 
       setCategoryError(true);
       return;
     }
     setCategoryError(false);
-
+     
     if (amount.trim() === "0") return;
     if (email.trim() === "") return;
-
+     
     try {
       const transaction = {
         title,
@@ -138,7 +144,7 @@ export default function NumPad({ onClose, email }: { onClose: () => void, email:
       setTitleError(false);
       setCategoryError(false);
       setValueTransaction("Expense");
-      fetchTransactions(new Date().getFullYear(), new Date().getMonth());
+      fetchTransactions(email, new Date().getFullYear(), new Date().getMonth());
       onClose?.();
     } catch (error) {
       console.log("Failed to add transaction.");
@@ -146,7 +152,7 @@ export default function NumPad({ onClose, email }: { onClose: () => void, email:
   };
 
   return (
-    <View className="bg-white w-full rounded-3xl max-w-md">
+    <View className="bg-white w-full rounded-t-3xl p-5">
       <View className="flex-row justify-between gap-5 w-full mb-4">
         <Dropdown
           data={transactionTypeData}
@@ -263,14 +269,14 @@ export default function NumPad({ onClose, email }: { onClose: () => void, email:
         }`}
       />
       {!isTitleFocused && (
-        <View className="flex flex-row justify-center items-center">
-          <View className="flex-row flex-wrap justify-center items-center w-[80%]">
+        <View className="flex flex-row justify-between items-center w-full p-0 m-0">
+          <View className="flex-row flex-wrap justify-start items-center w-[75%]">
             {KEYS.flat().map((key, idx) => (
               <TouchableOpacity
                 key={idx}
                 onPress={() => handleKeyPress(key)}
                 className={`${
-                  key === "000" ? "w-[59%]" : "w-24"
+                  key === "000" ? "w-[62%]" : "w-24"
                 } h-24  m-[1.5%] bg-gray-100 rounded-2xl justify-center items-center`}
               >
                 <Text className="text-xl font-medium">{key}</Text>

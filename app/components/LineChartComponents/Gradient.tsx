@@ -28,10 +28,8 @@ const Gradient = ({
       .lineTo(chartMargin, chartHeight)
       .lineTo(chartMargin, firstPoint.y);
   };
-
-  // Define gradient color sets per line if desired
-  const gradientColors = [
-    ["#93c5fd", "#eff6ff"], // Line 1
+ 
+  const gradientColors = [ 
     ["#86efac", "#f0fdf4"], // Line 2
     ["#fca5a5", "#fef2f2"], // Line 3
   ];

@@ -10,15 +10,16 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "googleServicesFile": "./GoogleService-Info.plist"
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
+      "icon": "./assets/images/icon.png", 
       "package": "com.anonymous.cashwise",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "bundler": "metro",
@@ -56,6 +57,9 @@
       "eas": {
         "projectId": "a759d1ab-6443-4dc9-9703-5c697a189e17"
       }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/a759d1ab-6443-4dc9-9703-5c697a189e17"
     }
   }
 }

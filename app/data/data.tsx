@@ -1,35 +1,11 @@
-import { MultiDataSet } from "../components/LineChart";
 
 export type DataType = {
   label: string;
   date: string;
   value: number;
 };
-
-export const data: DataType[] = [
-  { label: "Sat", date: "Saturday", value: 4500000 },
-  { label: "Sun", date: "Sunday", value: 5000000 },
-  { label: "Mon", date: "Monday", value: 3000000 },
-  { label: "Tue", date: "Tuesday", value: 4000000 },
-  { label: "Wed", date: "Wednesday", value: 3500000 },
-  { label: "Thu", date: "Thursday", value: 3200000 },
-  { label: "Fri", date: "Friday", value: 3350000 },
-];
-
-export const lineChartData = [
-  {
-    label: "Revenue",
-    color: "#3b82f6",
-    data: [
-      { label: "Sat", date: "Saturday", value: 1500000 },
-      { label: "Sun", date: "Sunday", value: 5000000 },
-      { label: "Mon", date: "Monday", value: 3000000 },
-      { label: "Tue", date: "Tuesday", value: 4000000 },
-      { label: "Wed", date: "Wednesday", value: 3500000 },
-      { label: "Thu", date: "Thursday", value: 3200000 },
-      { label: "Fri", date: "Friday", value: 3350000 },
-    ],
-  },
+ 
+export const lineChartData = [ 
   {
     label: "Expenses",
     color: "#22c55e",
@@ -39,8 +15,8 @@ export const lineChartData = [
       { label: "Mon", date: "Monday", value: 3200000 },
       { label: "Tue", date: "Tuesday", value: 2300000 },
       { label: "Wed", date: "Wednesday", value: 3250000 },
-      { label: "Thu", date: "Thursday", value: 1500000 },
-      { label: "Fri", date: "Friday", value: 1700000 },
+      { label: "Thu", date: "Wednesday", value: 3250000 },
+      { label: "Fri", date: "Wednesday", value: 3250000 },
     ],
   },
   {
@@ -58,7 +34,6 @@ export const lineChartData = [
   },
 ];
 
-export default {
-  data,
+export default { 
   lineChartData,
 };

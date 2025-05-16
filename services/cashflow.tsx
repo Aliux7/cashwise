@@ -16,6 +16,8 @@ export const addTransaction = async (transaction: {
   amount: number;
   type: string;
   category: string | null;
+  date: Date;
+  email: string;
 }) => {
   try {
     const docRef = await addDoc(collection(db, "cashflow"), {
